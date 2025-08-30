@@ -37,7 +37,6 @@ export default function ItemDetailsScreen() {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Item Details</Text>
         <View style={styles.headerIcons}>
-          <Text style={styles.icon}>♡</Text>
           <Text style={styles.icon}>↗</Text>
         </View>
       </View>

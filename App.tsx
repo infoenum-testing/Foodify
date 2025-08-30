@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
