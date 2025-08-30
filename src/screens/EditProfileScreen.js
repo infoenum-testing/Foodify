@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { updateUser } from "../redux/userSlice";
-import Input from "../components/Input"; 
-import Button from "../components/Button"; 
+import Input from "../components/Input";
+import Button from "../components/Button";
+import { launchImageLibrary } from "react-native-image-picker";
+
 
 export default function EditProfileScreen({ navigation }) {
   const dispatch = useDispatch();
@@ -12,26 +14,23 @@ export default function EditProfileScreen({ navigation }) {
   const [name, setName] = useState(user.name);
   const [avatar, setAvatar] = useState(user.avatar);
 
-  // ✅ selecionar imagem da galeria
-  const pickImage = async () => {
-    // pedir permissão
-    // const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    // if (!permission.granted) {
-    //   alert("Permissão para acessar a galeria é necessária!");
-    //   return;
-    // }
-
-    // // abrir galeria
-    // const result = await ImagePicker.launchImageLibraryAsync({
-    //   mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    //   allowsEditing: true,
-    //   aspect: [1, 1],
-    //   quality: 0.7,
-    // });
-
-    if (!result.canceled) {
-      setAvatar(result.assets[0].uri);
-    }
+  const pickImage = () => {
+    launchImageLibrary(
+      {
+        mediaType: "photo",
+        
+      },
+      (response) => {
+        if (response.didCancel) return;
+        if (response.errorCode) {
+          console.log("ImagePicker Error: ", response.errorMessage);
+          return;
+        }
+        if (response.assets && response.assets.length > 0) {
+          setAvatar(response.assets[0].uri);
+        }
+      }
+    );
   };
 
   // salvar alterações
