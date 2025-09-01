@@ -78,7 +78,6 @@ const OtpScreen = ({ navigation }) => {
             ))}
           </View>
 
-          {/* ✅ Reusable Button */}
           <Button title="Verify" onPress={handleVerify} />
 
           {/* Resend OTP */}

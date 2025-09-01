@@ -9,6 +9,7 @@ import {
     Alert,
 } from "react-native";
 import Button from '../components/Button';
+import SearchBar from "../components/SearchBar";
 
 const productsData = [
     {
@@ -58,7 +59,7 @@ const CartItem = ({ item, onUpdateQuantity, onDelete }) => {
                 >
                     <Image
                         source={require('../../Assets/Images/delete.png')}
-                        style={{ width: 24, height: 24 , tintColor: 'red'}}
+                        style={{ width: 24, height: 24, tintColor: 'red' }}
                         resizeMode="contain"
                     />
                 </TouchableOpacity>
@@ -71,6 +72,7 @@ export default function CartScreen() {
     const [cartItems, setCartItems] = useState(
         productsData.map((p) => ({ ...p, quantity: 1 }))
     );
+    const [search, setSearch] = useState("");
 
     const updateQuantity = (id, newQty) => {
         if (newQty < 1) return;
@@ -94,16 +96,28 @@ export default function CartScreen() {
         Alert.alert("Checkout", `Total amount: ₹${totalPrice}`);
     };
 
+    // 🔍 Filtered items based on search
+    const filteredItems = cartItems.filter((item) =>
+        item.name.toLowerCase().includes(search.toLowerCase())
+    );
+
     return (
         <View style={{ flex: 1, padding: 10 }}>
-            {cartItems.length === 0 ? (
+            {/* 🔍 SearchBar */}
+            <SearchBar
+                value={search}
+                onChangeText={setSearch}
+                placeholder="Search in cart..."
+            />
+
+            {filteredItems.length === 0 ? (
                 <Text style={{ fontSize: 18, textAlign: "center", marginTop: 200 }}>
-                    Your cart is empty
+                    {search ? "No items match your search" : "Your cart is empty"}
                 </Text>
             ) : (
                 <>
                     <FlatList
-                        data={cartItems}
+                        data={filteredItems}
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <CartItem
@@ -118,7 +132,6 @@ export default function CartScreen() {
                         <Text style={styles.totalText}>Total: ₹{totalPrice}</Text>
                         <Button title="Checkout" onPress={handleCheckout} />
                     </View>
-
                 </>
             )}
         </View>
@@ -177,10 +190,6 @@ const styles = StyleSheet.create({
         paddingVertical: 5,
         borderRadius: 5,
         marginLeft: 10,
-    },
-    deleteText: {
-        color: "#fff",
-        fontSize: 12,
     },
     totalContainer: {
         flexDirection: 'row',

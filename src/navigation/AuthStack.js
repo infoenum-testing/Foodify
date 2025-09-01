@@ -7,6 +7,8 @@ import ForgotPasswordScreen from '../screens/ForgotPasswordScreen';
 import OtpScreen from '../screens/OtpScreen';
 import ResetPassword from '../screens/ResetPasswordScreen'; 
 import EditProflie from '../screens/EditProfileScreen'; 
+ import ItemDetailsScreen from '../screens/ItemDetailsScreen';
+
 
 import HomeTab from './HomeTab';
 
@@ -22,6 +24,8 @@ const AuthStack = () => {
       <Stack.Screen name="OtpScreen" component={OtpScreen} options={{ title: '' }} />
       <Stack.Screen name="ResetPassword" component={ResetPassword} options={{ title: '' }} />
        <Stack.Screen name="EditProflie" component={EditProflie} options={{ headerShown: true }} />
+      <Stack.Screen name="ItemDetails" component={ItemDetailsScreen} options={{ headerShown: true }} />
+
       <Stack.Screen name="HomeTab" component={HomeTab} options={{ headerShown: false }} />
     </Stack.Navigator>
   );

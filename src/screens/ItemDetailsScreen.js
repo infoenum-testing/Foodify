@@ -7,12 +7,12 @@ import {
   ScrollView,
   Alert,
 } from "react-native";
-import Button from "../components/Button"; 
+import Button from "../components/Button";
 
-const PIZZA_URL =
-  "https://png.pngtree.com/png-clipart/20240831/original/pngtree-sliced-pizza-png-image_15897645.png";
+export default function ItemDetailsScreen({ route }) {
+  // ✅ Get item from params
+  const { item } = route.params;
 
-export default function ItemDetailsScreen() {
   const [quantity, setQuantity] = useState(1);
 
   const increaseQty = () => setQuantity(quantity + 1);
@@ -20,39 +20,32 @@ export default function ItemDetailsScreen() {
     if (quantity > 1) setQuantity(quantity - 1);
   };
 
-  const price = 299;
+  const price = item.price;
   const total = price * quantity;
 
   const handleAddToCart = () => {
-    Alert.alert("Added to Cart", `You added ${quantity} pizza(s) to cart.`);
+    Alert.alert("Added to Cart", `You added ${quantity} ${item.name}(s) to cart.`);
   };
 
   const handleBuyNow = () => {
-    Alert.alert("Buy Now", `Proceeding to buy ${quantity} pizza(s).`);
+    Alert.alert("Buy Now", `Proceeding to buy ${quantity} ${item.name}(s).`);
   };
 
   return (
     <ScrollView style={styles.container}>
-      {/* Top Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Item Details</Text>
-        <View style={styles.headerIcons}>
-          <Text style={styles.icon}>↗</Text>
-        </View>
-      </View>
 
-      {/* Pizza Image */}
+      {/* Item Image */}
       <View style={styles.imageWrapper}>
-        <Image source={{ uri: PIZZA_URL }} style={styles.image} />
+        <Image source={{ uri: item.image }} style={styles.image} />
       </View>
 
       {/* Title + Price */}
       <View style={styles.rowBetween}>
-        <Text style={styles.title}>Classic Margherita Pizza</Text>
+        <Text style={styles.title}>{item.name}</Text>
         <Text style={styles.price}>₹{price}</Text>
       </View>
 
-      {/* Rating */}
+      {/* Rating (dummy for now) */}
       <View style={styles.ratingRow}>
         <Text style={styles.star}>⭐</Text>
         <Text style={styles.rating}>4.5</Text>
@@ -72,8 +65,7 @@ export default function ItemDetailsScreen() {
       {/* Description */}
       <Text style={styles.sectionTitle}>Description</Text>
       <Text style={styles.description}>
-        Fresh tomatoes, mozzarella, basil and extra virgin olive oil baked to
-        perfection. Thin crust, wood-fired, and super flavorful.
+        {item.description || "Delicious food freshly prepared with the best ingredients."}
       </Text>
 
       <View style={styles.divider} />
@@ -85,31 +77,34 @@ export default function ItemDetailsScreen() {
       </View>
 
       <View style={styles.buttonRow}>
-        <Button title="Add to Cart" onPress={handleAddToCart} />
-        <Button title="Buy Now" onPress={handleBuyNow} />
+        <View style={styles.buttonWrapper}>
+          <Button title="Add to Cart" onPress={handleAddToCart} />
+        </View>
+        <View style={styles.buttonWrapper}>
+          <Button title="Buy Now" onPress={handleBuyNow} />
+        </View>
       </View>
+
     </ScrollView>
   );
 }
 
+// --- Styles ---
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 16 },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    padding: 16
   },
-  headerTitle: { fontSize: 18, fontWeight: "bold" },
-  headerIcons: { flexDirection: "row", gap: 12 },
-  icon: { fontSize: 20 },
+
   imageWrapper: {
     alignItems: "center",
     marginVertical: 16,
   },
   image: {
-    width: 180,
-    height: 180,
-    borderRadius: 90,
+    width: 200,
+    height: 200,
+    borderRadius: 12,
   },
   rowBetween: {
     flexDirection: "row",
@@ -117,24 +112,69 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: 8,
   },
-  title: { fontSize: 20, fontWeight: "bold", flex: 1, marginRight: 10 },
-  price: { fontSize: 20, fontWeight: "600", color: "#000" },
-  ratingRow: { flexDirection: "row", alignItems: "center", marginVertical: 4 },
-  star: { fontSize: 16, marginRight: 4 },
-  rating: { fontWeight: "600", marginRight: 6 },
-  reviews: { color: "#777" },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    flex: 1,
+    marginRight: 10,
+  },
+  price: {
+    fontSize: 20,
+    fontWeight: "600",
+    color: "#000",
+  },
+  ratingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 4,
+  },
+  star: {
+    fontSize: 16,
+    marginRight: 4
+  },
+  rating: {
+    fontWeight: "600",
+    marginRight: 6
+  },
+  reviews: {
+    color: "#777"
+  },
   divider: {
     height: 1,
     backgroundColor: "#eee",
     marginVertical: 12,
   },
-  qtyRow: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
-  qtyValue: { fontSize: 18, fontWeight: "600", marginHorizontal: 12 },
-  description: { fontSize: 14, color: "#444", marginBottom: 16 },
-  
-  totalText: { fontSize: 16, fontWeight: "bold" },
-  totalPrice: { fontSize: 18, fontWeight: "bold" },
-  buttonRow: {
-    marginTop: 16,
+  qtyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
   },
+  qtyValue: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginHorizontal: 12,
+  },
+  description: {
+    fontSize: 14,
+    color: "#444",
+    marginBottom: 16,
+  },
+  totalText: {
+    fontSize: 16,
+    fontWeight: "bold"
+  },
+  totalPrice: {
+    fontSize: 18,
+    fontWeight: "bold"
+  },
+  buttonRow: {
+    flexDirection: "row",
+    marginTop: 16,
+    justifyContent: "space-between",
+  },
+  buttonWrapper: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+
 });

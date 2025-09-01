@@ -4,7 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import AddToCartScreen from '../screens/AddToCartScreen';
-import ItemDetailsScreen from '../screens/ItemDetailsScreen';
+// import ItemDetailsScreen from '../screens/ItemDetailsScreen';
 
 
 
@@ -88,7 +88,7 @@ const HomeTab = () => {
         }}
       />
 
-      <Tab.Screen
+      {/* <Tab.Screen
         name="item"
         component={ItemDetailsScreen}
         options={{
@@ -114,7 +114,7 @@ const HomeTab = () => {
             </View>
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
