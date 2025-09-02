@@ -8,11 +8,10 @@ import {
   Alert,
 } from "react-native";
 import Button from "../components/Button";
+import { FirebaseAuth, db } from "../../FirebaseManager/firebaseConfig";
 
 export default function ItemDetailsScreen({ route }) {
-  // ✅ Get item from params
   const { item } = route.params;
-
   const [quantity, setQuantity] = useState(1);
 
   const increaseQty = () => setQuantity(quantity + 1);
@@ -23,8 +22,25 @@ export default function ItemDetailsScreen({ route }) {
   const price = item.price;
   const total = price * quantity;
 
-  const handleAddToCart = () => {
-    Alert.alert("Added to Cart", `You added ${quantity} ${item.name}(s) to cart.`);
+  const handleAddToCart = async () => {
+    try {
+      const user = FirebaseAuth.currentUser;
+      if (!user) {
+        Alert.alert("Error", "You must be logged in to add to cart.");
+        return;
+      }
+
+      // Save to Realtime DB
+      await db.ref(`/carts/${user.uid}/${item.id}`).set({
+        ...item,
+        quantity,
+      });
+
+      Alert.alert("Added to Cart", `${quantity} ${item.name}(s) added.`);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      Alert.alert("Error", "Could not add to cart.");
+    }
   };
 
   const handleBuyNow = () => {
@@ -33,7 +49,6 @@ export default function ItemDetailsScreen({ route }) {
 
   return (
     <ScrollView style={styles.container}>
-
       {/* Item Image */}
       <View style={styles.imageWrapper}>
         <Image source={{ uri: item.image }} style={styles.image} />
@@ -45,7 +60,7 @@ export default function ItemDetailsScreen({ route }) {
         <Text style={styles.price}>₹{price}</Text>
       </View>
 
-      {/* Rating (dummy for now) */}
+      {/* Rating (static for now) */}
       <View style={styles.ratingRow}>
         <Text style={styles.star}>⭐</Text>
         <Text style={styles.rating}>4.5</Text>
@@ -65,12 +80,13 @@ export default function ItemDetailsScreen({ route }) {
       {/* Description */}
       <Text style={styles.sectionTitle}>Description</Text>
       <Text style={styles.description}>
-        {item.description || "Delicious food freshly prepared with the best ingredients."}
+        {item.description ||
+          "Delicious food freshly prepared with the best ingredients."}
       </Text>
 
       <View style={styles.divider} />
 
-      {/* Total + Buttons */}
+      {/* Total + Actions */}
       <View style={styles.rowBetween}>
         <Text style={styles.totalText}>Total</Text>
         <Text style={styles.totalPrice}>₹{total}</Text>
@@ -84,7 +100,6 @@ export default function ItemDetailsScreen({ route }) {
           <Button title="Buy Now" onPress={handleBuyNow} />
         </View>
       </View>
-
     </ScrollView>
   );
 }
@@ -96,15 +111,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 16
   },
-
   imageWrapper: {
     alignItems: "center",
-    marginVertical: 16,
+    marginVertical: 16
   },
   image: {
     width: 200,
     height: 200,
-    borderRadius: 12,
+    borderRadius: 12
   },
   rowBetween: {
     flexDirection: "row",
@@ -115,18 +129,18 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    flex: 1,
-    marginRight: 10,
+    flex: 1
   },
   price: {
     fontSize: 20,
-    fontWeight: "600",
-    color: "#000",
+    fontWeight: "600"
   },
+
+  // ⭐ Rating
   ratingRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 4,
+    marginVertical: 4
   },
   star: {
     fontSize: 16,
@@ -139,26 +153,37 @@ const styles = StyleSheet.create({
   reviews: {
     color: "#777"
   },
+
   divider: {
     height: 1,
     backgroundColor: "#eee",
-    marginVertical: 12,
+    marginVertical: 12
+  },
+
+  // Quantity
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 6
   },
   qtyRow: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 16
   },
   qtyValue: {
     fontSize: 18,
     fontWeight: "600",
-    marginHorizontal: 12,
+    marginHorizontal: 12
   },
+
+  // Description
   description: {
     fontSize: 14,
     color: "#444",
-    marginBottom: 16,
+    marginBottom: 16
   },
+
   totalText: {
     fontSize: 16,
     fontWeight: "bold"
@@ -167,14 +192,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "bold"
   },
+
   buttonRow: {
     flexDirection: "row",
-    marginTop: 16,
-    justifyContent: "space-between",
+    marginTop: 16
   },
   buttonWrapper: {
     flex: 1,
-    marginHorizontal: 5,
+    marginHorizontal: 5
   },
-
 });

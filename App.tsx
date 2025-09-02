@@ -7,10 +7,10 @@ import { Provider, useSelector } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 
 import AuthStack from "./src/navigation/AuthStack";
-import HomeTab from "./src/navigation/HomeTab"; 
+import HomeTab from "./src/navigation/HomeTab";
 import { store, persistor } from "./src/redux/store";
 
-// 🔹 AppNavigator component to decide initial route
+// AppNavigator component to decide initial route
 const AppNavigator = () => {
   const { isLoggedIn } = useSelector((state) => state.auth);
 
@@ -21,7 +21,7 @@ function App() {
   const isDarkMode = useColorScheme() === "dark";
 
   useEffect(() => {
-    SplashScreen.hide(); 
+    SplashScreen.hide();
   }, []);
 
   return (

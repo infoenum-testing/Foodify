@@ -33,7 +33,7 @@ const LoginScreen = ({ navigation }) => {
         if (!valid) return;
             try {
         await AuthService.login(email, password);
-        navigation.navigate('HomeTab');
+        navigation.replace('HomeTab');
     } catch (error) {
         Alert.alert('Login Failed', error.message);
     }

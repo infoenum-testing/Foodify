@@ -1,6 +1,6 @@
 // src/screens/HomeScreen.js
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -15,30 +15,34 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import SearchBar from "../components/SearchBar";
 import { fetchMenu } from "../services/api";
 
-
 const HomeScreen = ({ navigation }) => {
   const [categories, setCategories] = useState([]);
   const [productsByCategory, setProductsByCategory] = useState({});
+  const [allProducts, setAllProducts] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load Firebase Menu Data
+  // Load menu data
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      const { categories, productsByCategory } = await fetchMenu();
-      setCategories(categories);
-      setProductsByCategory(productsByCategory);
+      const menuData = await fetchMenu();
+
+      setCategories(menuData.categories);
+      setProductsByCategory(menuData.productsByCategory);
+
+      // Flatten products for search
+      const flatProducts = [];
+      Object.values(menuData.productsByCategory).forEach((arr) => {
+        arr.forEach((p) => flatProducts.push(p));
+      });
+      setAllProducts(flatProducts);
+
       setLoading(false);
     };
+
     loadData();
   }, []);
-
-  // Flatten all products for search
-  const allProducts = useMemo(
-    () => Object.values(productsByCategory).flat(),
-    [productsByCategory]
-  );
 
   if (loading) {
     return (
@@ -50,7 +54,7 @@ const HomeScreen = ({ navigation }) => {
 
   return (
     <SafeAreaProvider style={styles.container}>
-      {/*  Search Bar */}
+      {/* Search Bar */}
       <SearchBar
         data={allProducts}
         filterKey="name"
@@ -59,7 +63,7 @@ const HomeScreen = ({ navigation }) => {
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* 📂 Categories */}
+        {/* Categories */}
         <View>
           <Text style={styles.sectionTitle}>Categories</Text>
           <ScrollView
@@ -71,9 +75,8 @@ const HomeScreen = ({ navigation }) => {
               <TouchableOpacity
                 key={cat.id}
                 style={styles.categoryItem}
-                activeOpacity={0.8}
                 onPress={() =>
-                  navigation.navigate("ItemDetails", { item })
+                  navigation.navigate("CategoryProducts", { category: cat })
                 }
               >
                 <View style={styles.categoryCircle}>
@@ -85,6 +88,7 @@ const HomeScreen = ({ navigation }) => {
           </ScrollView>
         </View>
 
+
         {/* Products by Category */}
         {categories.map((cat) => (
           <View key={cat.id} style={styles.sectionWrapper}>
@@ -92,22 +96,28 @@ const HomeScreen = ({ navigation }) => {
               <Text style={styles.sectionTitle}>{cat.name}</Text>
               <TouchableOpacity
                 onPress={() =>
-                  navigation.navigate("CategoryProducts", { category: cat })
+                  navigation.navigate("CategoryProducts", {
+                    category: {
+                      ...cat,
+                      products: productsByCategory[cat.name] || [],
+                    },
+                  })
                 }
               >
                 <Text style={styles.seeAll}>See All</Text>
               </TouchableOpacity>
+
             </View>
+
             <FlatList
               data={productsByCategory[cat.name] || []}
-              keyExtractor={(item) => String(item.id)}
               horizontal
+              keyExtractor={(item) => String(item.id)}
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.horizontalList}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.productCard}
-                  activeOpacity={0.9}
                   onPress={() => navigation.navigate("ItemDetails", { item })}
                 >
                   <Image source={{ uri: item.image }} style={styles.productImage} />
@@ -176,10 +186,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
     elevation: 4,
   },
   categoryInitial: {
@@ -201,10 +207,6 @@ const styles = StyleSheet.create({
     width: 180,
     marginRight: 16,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
     elevation: 5,
   },
   productImage: {

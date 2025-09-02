@@ -17,7 +17,7 @@ const WelcomeScreen = ({ navigation }) => {
         <Text style={styles.subtitle}>
           The best delivery app in town for{"\n"}delivering your daily fresh groceries
         </Text>
-        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity style={styles.button} onPress={() => navigation.replace('Login')}>
           <Text style={styles.buttonText}>Shop now</Text>
         </TouchableOpacity>
       </View>

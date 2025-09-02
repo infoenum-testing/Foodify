@@ -87,34 +87,6 @@ const HomeTab = () => {
           ),
         }}
       />
-
-      {/* <Tab.Screen
-        name="item"
-        component={ItemDetailsScreen}
-        options={{
-          tabBarIcon: ({ focused }) => (
-            <View
-              style={{
-                backgroundColor: focused ? '#e0e0e0' : 'transparent',
-                borderRadius: 25,
-                padding: 12,
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <Image
-                source={profileIcon}
-                style={{
-                  width: 24,
-                  height: 24,
-                  tintColor: 'black',
-                }}
-                resizeMode="contain"
-              />
-            </View>
-          ),
-        }}
-      /> */}
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
