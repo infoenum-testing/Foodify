@@ -1,5 +1,4 @@
 // src/screens/HomeScreen.js
-
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -21,6 +20,8 @@ const HomeScreen = ({ navigation }) => {
   const [allProducts, setAllProducts] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   // Load menu data
   useEffect(() => {
@@ -31,7 +32,7 @@ const HomeScreen = ({ navigation }) => {
       setCategories(menuData.categories);
       setProductsByCategory(menuData.productsByCategory);
 
-      // Flatten products for search
+      // Flatten products for "All"
       const flatProducts = [];
       Object.values(menuData.productsByCategory).forEach((arr) => {
         arr.forEach((p) => flatProducts.push(p));
@@ -44,6 +45,18 @@ const HomeScreen = ({ navigation }) => {
     loadData();
   }, []);
 
+  // --- Search filter logic ---
+  useEffect(() => {
+    if (searchQuery.trim().length === 0) {
+      setFilteredResults([]);
+    } else {
+      const results = allProducts.filter((item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredResults(results);
+    }
+  }, [searchQuery, allProducts]);
+
   if (loading) {
     return (
       <SafeAreaProvider style={styles.center}>
@@ -52,86 +65,157 @@ const HomeScreen = ({ navigation }) => {
     );
   }
 
+  // --- Render single product card ---
+  const renderProduct = ({ item }) => (
+    <TouchableOpacity
+      style={styles.productCard}
+      onPress={() => navigation.navigate("ItemDetails", { item })}
+    >
+      <Image source={{ uri: item.image }} style={styles.productImage} />
+      <View style={styles.productInfo}>
+        <Text style={styles.productName}>{item.name}</Text>
+        <Text style={styles.shopName}>{item.shop}</Text>
+        <Text style={styles.productPrice}>₹{item.price}</Text>
+      </View>
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaProvider style={styles.container}>
-      {/* Search Bar */}
+      {/* 🔎 Search Bar */}
       <SearchBar
-        data={allProducts}
-        filterKey="name"
+        value={searchQuery}
+        onChangeText={setSearchQuery}
         placeholder="Search delicious food..."
-        onResults={setFilteredResults}
       />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Categories */}
-        <View>
-          <Text style={styles.sectionTitle}>Categories</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.categoriesContainer}
-          >
-            {categories.map((cat) => (
-              <TouchableOpacity
-                key={cat.id}
-                style={styles.categoryItem}
-                onPress={() =>
-                  navigation.navigate("CategoryProducts", { category: cat })
-                }
-              >
-                <View style={styles.categoryCircle}>
-                  <Text style={styles.categoryInitial}>{cat.name[0]}</Text>
-                </View>
-                <Text style={styles.categoryText}>{cat.name}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-
-        {/* Products by Category */}
-        {categories.map((cat) => (
-          <View key={cat.id} style={styles.sectionWrapper}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>{cat.name}</Text>
-              <TouchableOpacity
-                onPress={() =>
-                  navigation.navigate("CategoryProducts", {
-                    category: {
-                      ...cat,
-                      products: productsByCategory[cat.name] || [],
-                    },
-                  })
-                }
-              >
-                <Text style={styles.seeAll}>See All</Text>
-              </TouchableOpacity>
-
-            </View>
-
-            <FlatList
-              data={productsByCategory[cat.name] || []}
-              horizontal
-              keyExtractor={(item) => String(item.id)}
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.horizontalList}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.productCard}
-                  onPress={() => navigation.navigate("ItemDetails", { item })}
-                >
-                  <Image source={{ uri: item.image }} style={styles.productImage} />
-                  <View style={styles.productInfo}>
-                    <Text style={styles.productName}>{item.name}</Text>
-                    <Text style={styles.shopName}>{item.shop}</Text>
-                    <Text style={styles.productPrice}>₹{item.price}</Text>
-                  </View>
-                </TouchableOpacity>
-              )}
-            />
+      {/* If search has results */}
+      {searchQuery.length > 0 ? (
+        filteredResults.length > 0 ? (
+          <FlatList
+            data={filteredResults}
+            keyExtractor={(item) => String(item.id)}
+            numColumns={2}
+            contentContainerStyle={styles.gridList}
+            renderItem={renderProduct}
+          />
+        ) : (
+          <View style={styles.center}>
+            <Text style={{ fontSize: 16, color: "#666" }}>No items found</Text>
           </View>
-        ))}
-      </ScrollView>
+        )
+      ) : (
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/*  Categories Chips */}
+          <View>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.categoriesContainer}
+            >
+              {/* All Option */}
+              <TouchableOpacity
+                style={[
+                  styles.categoryChip,
+                  selectedCategory === "All" && styles.selectedCategoryChip,
+                ]}
+                onPress={() => setSelectedCategory("All")}
+              >
+                <Text
+                  style={[
+                    styles.categoryText,
+                    selectedCategory === "All" && styles.selectedCategoryText,
+                  ]}
+                >
+                  All
+                </Text>
+              </TouchableOpacity>
+
+              {categories.map((cat) => {
+                const isSelected = selectedCategory === cat.name;
+                return (
+                  <TouchableOpacity
+                    key={cat.id}
+                    style={[
+                      styles.categoryChip,
+                      isSelected && styles.selectedCategoryChip,
+                    ]}
+                    onPress={() => setSelectedCategory(cat.name)}
+                  >
+                    <Text
+                      style={[
+                        styles.categoryText,
+                        isSelected && styles.selectedCategoryText,
+                      ]}
+                    >
+                      {cat.name}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </ScrollView>
+          </View>
+
+          {/* 🛒 Products Section */}
+          {selectedCategory === "All"
+            ? categories.map((cat) => (
+                <View key={cat.id} style={styles.sectionWrapper}>
+                  <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>{cat.name}</Text>
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate("CategoryProducts", {
+                          category: {
+                            ...cat,
+                            products: productsByCategory[cat.name] || [],
+                          },
+                        })
+                      }
+                    >
+                      <Text style={styles.seeAll}>See All</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  <FlatList
+                    data={productsByCategory[cat.name] || []}
+                    horizontal
+                    keyExtractor={(item) => String(item.id)}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.horizontalList}
+                    renderItem={renderProduct}
+                  />
+                </View>
+              ))
+            : (
+              <View style={styles.sectionWrapper}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>{selectedCategory}</Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate("CategoryProducts", {
+                        category: {
+                          name: selectedCategory,
+                          products: productsByCategory[selectedCategory] || [],
+                        },
+                      })
+                    }
+                  >
+                    <Text style={styles.seeAll}>See All</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <FlatList
+                  data={productsByCategory[selectedCategory] || []}
+                  horizontal
+                  keyExtractor={(item) => String(item.id)}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.horizontalList}
+                  renderItem={renderProduct}
+                />
+              </View>
+            )}
+        </ScrollView>
+      )}
     </SafeAreaProvider>
   );
 };
@@ -150,6 +234,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+
+  // --- Categories ---
   sectionWrapper: {
     marginBottom: 30,
   },
@@ -174,38 +260,39 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
   },
-  categoryItem: {
-    marginRight: 20,
-    alignItems: "center",
+  categoryChip: {
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: "#f2f2f2",
+    marginRight: 12,
   },
-  categoryCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: "#FFEAE6",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 8,
-    elevation: 4,
-  },
-  categoryInitial: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#FF6F61",
+  selectedCategoryChip: {
+    backgroundColor: "#FF6F61",
   },
   categoryText: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#444",
+    color: "#333",
   },
+  selectedCategoryText: {
+    color: "#fff",
+    fontWeight: "700",
+  },
+
+  // --- Product Cards ---
   horizontalList: {
     paddingLeft: 20,
+  },
+  gridList: {
+    padding: 20,
   },
   productCard: {
     backgroundColor: "#fff",
     borderRadius: 18,
-    width: 180,
+    width: 160,
     marginRight: 16,
+    marginBottom: 16,
     overflow: "hidden",
     elevation: 5,
   },

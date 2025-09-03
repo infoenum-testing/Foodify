@@ -1,4 +1,3 @@
-// src/Screens/CheckoutScreen.js
 import React, { useState } from "react";
 import {
   View,
@@ -10,6 +9,7 @@ import {
   Image,
 } from "react-native";
 import Button from "../components/Button";
+import { FirebaseAuth, db } from "../../FirebaseManager/firebaseConfig";
 
 export default function CheckoutScreen({ route, navigation }) {
   const { totalPrice, cartItems } = route.params;
@@ -17,18 +17,50 @@ export default function CheckoutScreen({ route, navigation }) {
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
 
-  const handlePlaceOrder = () => {
+
+  const handlePlaceOrder = async () => {
     if (!name || !address || !phone) {
       Alert.alert("Error", "Please fill all details");
       return;
     }
-    Alert.alert("Success", "Your order has been placed!");
-    navigation.navigate("Home");
+
+    try {
+      const user = FirebaseAuth.currentUser;
+      if (!user) {
+        Alert.alert("Error", "User not logged in!");
+        return;
+      }
+
+      const userId = user.uid;
+
+      const newOrderRef = db.ref(`/users/${userId}/orders`).push();
+
+      await newOrderRef.set({
+        customer: { name, address, phone },
+        items: cartItems,
+        totalPrice,
+      });
+
+      setName("");
+      setAddress("");
+      setPhone("");
+
+      await db.ref(`/carts/${userId}`).remove();
+
+      Alert.alert("Success", "Your order has been placed!", [
+        {
+          text: "OK",
+          onPress: () => navigation.goBack()
+        },
+      ]);
+    } catch (error) {
+      console.error("Error adding order: ", error);
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-
       {/* Order Summary */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Order Summary</Text>
@@ -41,7 +73,7 @@ export default function CheckoutScreen({ route, navigation }) {
             />
             <View style={{ flex: 1, marginLeft: 12 }}>
               <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemDetails}>Quantity: {item.quantity}</Text>
+              <Text style={styles.itemDetails}>Qty: {item.quantity}</Text>
               <Text style={styles.itemDetails}>Price: ₹{item.price}</Text>
             </View>
             <Text style={styles.subtotal}>
@@ -57,7 +89,7 @@ export default function CheckoutScreen({ route, navigation }) {
 
       {/* Delivery Info */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}> Delivery Details</Text>
+        <Text style={styles.sectionTitle}>Delivery Details</Text>
         <TextInput
           placeholder="Full Name"
           value={name}
@@ -119,7 +151,7 @@ const styles = StyleSheet.create({
   itemImage: {
     width: 60,
     height: 60,
-    borderRadius: 30, // 🔹 makes it round
+    borderRadius: 30,
     backgroundColor: "#f2f2f2",
   },
   itemName: {
@@ -129,7 +161,7 @@ const styles = StyleSheet.create({
   },
   itemDetails: {
     fontSize: 14,
-    color: "#666",
+    color: "#6666668c",
     marginTop: 2,
   },
   subtotal: {
@@ -151,7 +183,7 @@ const styles = StyleSheet.create({
   total: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#e63946",
+    color: "#28a745",
   },
   input: {
     borderWidth: 1,

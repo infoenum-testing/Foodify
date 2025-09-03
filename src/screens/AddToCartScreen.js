@@ -54,7 +54,7 @@ export default function CartScreen({ navigation }) {
 
 
     const filteredItems = cartItems.filter((item) =>
-        item.name.toLowerCase().includes(search.toLowerCase())
+        item?.name?.toLowerCase().includes(search.toLowerCase())
     );
 
     return (

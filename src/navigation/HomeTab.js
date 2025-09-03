@@ -4,7 +4,6 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import AddToCartScreen from '../screens/AddToCartScreen';
-// import ItemDetailsScreen from '../screens/ItemDetailsScreen';
 
 
 
@@ -24,7 +23,7 @@ const HomeTab = () => {
         tabBarInactiveTintColor: 'black',
         tabBarStyle: {
           backgroundColor: '#fff',
-          height: 80, // aapka custom height
+          height: 80,
         },
         tabBarItemStyle: {
           justifyContent: 'center',
@@ -39,7 +38,7 @@ const HomeTab = () => {
           tabBarIcon: ({ focused }) => (
             <View
               style={{
-                backgroundColor: focused ? '#e0e0e0' : 'transparent',
+                backgroundColor: focused ? '#E9F5FA' : 'transparent',
                 borderRadius: 25,
                 padding: 12,
                 justifyContent: 'center',
@@ -51,7 +50,7 @@ const HomeTab = () => {
                 style={{
                   width: 24,
                   height: 24,
-                  tintColor: 'black',
+                  tintColor: 'gray',
                 }}
                 resizeMode="contain"
               />
@@ -67,7 +66,7 @@ const HomeTab = () => {
           tabBarIcon: ({ focused }) => (
             <View
               style={{
-                backgroundColor: focused ? '#e0e0e0' : 'transparent',
+                backgroundColor: focused ? '#E9F5FA' : 'transparent',
                 borderRadius: 25,
                 padding: 12,
                 justifyContent: 'center',
@@ -79,7 +78,7 @@ const HomeTab = () => {
                 style={{
                   width: 24,
                   height: 24,
-                  tintColor: 'black',
+                  tintColor: 'gray',
                 }}
                 resizeMode="contain"
               />
@@ -94,7 +93,7 @@ const HomeTab = () => {
           tabBarIcon: ({ focused }) => (
             <View
               style={{
-                backgroundColor: focused ? '#e0e0e0' : 'transparent',
+                backgroundColor: focused ? '#E9F5FA' : 'transparent',
                 borderRadius: 25,
                 padding: 12,
                 justifyContent: 'center',
@@ -106,7 +105,7 @@ const HomeTab = () => {
                 style={{
                   width: 24,
                   height: 24,
-                  tintColor: 'black',
+                  tintColor: 'gray',
                 }}
                 resizeMode="contain"
               />
