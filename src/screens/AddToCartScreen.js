@@ -1,10 +1,11 @@
-
+// src/screens/CartScreen.js
 import React, { useState, useEffect } from "react";
-import { View, Text, FlatList, StyleSheet, Alert } from "react-native";
+import { View, Text, FlatList, StyleSheet } from "react-native";
 import Button from "../components/Button";
 import SearchBar from "../components/SearchBar";
 import CartItem from "../components/CartItem";
 import { FirebaseAuth, db } from "../../FirebaseManager/firebaseConfig";
+import { showError } from "../utils/alerts";
 
 export default function CartScreen({ navigation }) {
     const [cartItems, setCartItems] = useState([]);
@@ -15,7 +16,6 @@ export default function CartScreen({ navigation }) {
         if (!user) return;
 
         const cartRef = db.ref(`/carts/${user.uid}`);
-
         cartRef.on("value", (snapshot) => {
             const data = snapshot.val() || {};
             const items = Object.keys(data).map((key) => ({
@@ -33,14 +33,18 @@ export default function CartScreen({ navigation }) {
         const user = FirebaseAuth.currentUser;
         if (!user) return;
 
-        db.ref(`/carts/${user.uid}/${id}`).update({ quantity: newQty });
+        db.ref(`/carts/${user.uid}/${id}`).update({ quantity: newQty }).catch(() => {
+            showError("Failed to update item quantity");
+        });
     };
 
     const deleteItem = (id) => {
         const user = FirebaseAuth.currentUser;
         if (!user) return;
 
-        db.ref(`/carts/${user.uid}/${id}`).remove();
+        db.ref(`/carts/${user.uid}/${id}`).remove().catch(() => {
+            showError("Failed to remove item");
+        });
     };
 
     const totalPrice = cartItems.reduce(
@@ -52,13 +56,12 @@ export default function CartScreen({ navigation }) {
         navigation.navigate("Checkout", { totalPrice, cartItems });
     };
 
-
     const filteredItems = cartItems.filter((item) =>
         item?.name?.toLowerCase().includes(search.toLowerCase())
     );
 
     return (
-        <View style={{ flex: 1, padding: 10 }}>
+        <View style={styles.container}>
             <SearchBar
                 value={search}
                 onChangeText={setSearch}
@@ -66,7 +69,7 @@ export default function CartScreen({ navigation }) {
             />
 
             {filteredItems.length === 0 ? (
-                <Text style={{ fontSize: 18, textAlign: "center", marginTop: 200 }}>
+                <Text style={styles.emptyText}>
                     {search ? "No items match your search" : "Your cart is empty"}
                 </Text>
             ) : (
@@ -94,6 +97,16 @@ export default function CartScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 10,
+    },
+    emptyText: {
+        fontSize: 18,
+        textAlign: "center",
+        marginTop: 200,
+        color: "#666",
+    },
     totalContainer: {
         flexDirection: "row",
         justifyContent: "space-between",

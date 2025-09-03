@@ -5,28 +5,29 @@ import {
   StyleSheet,
   Image,
   ScrollView,
-  Alert,
 } from "react-native";
 import Button from "../components/Button";
 import { FirebaseAuth, db } from "../../FirebaseManager/firebaseConfig";
+import { showError, showSuccess } from "../utils/alerts";
 
 export default function ItemDetailsScreen({ route }) {
   const { item } = route.params;
   const [quantity, setQuantity] = useState(1);
+  const price = item.price;
+  const total = price * quantity;
 
   const increaseQty = () => setQuantity(quantity + 1);
   const decreaseQty = () => {
     if (quantity > 1) setQuantity(quantity - 1);
   };
 
-  const price = item.price;
-  const total = price * quantity;
+  
 
   const handleAddToCart = async () => {
     try {
       const user = FirebaseAuth.currentUser;
       if (!user) {
-        Alert.alert("Error", "You must be logged in to add to cart.");
+        showError("You must be logged in to add to cart.");
         return;
       }
 
@@ -36,15 +37,15 @@ export default function ItemDetailsScreen({ route }) {
         quantity,
       });
 
-      Alert.alert("Added to Cart", `${quantity} ${item.name}(s) added.`);
+      showSuccess(`${quantity} ${item.name}(s) added to cart.`);
     } catch (error) {
       console.error("Error adding to cart:", error);
-      Alert.alert("Error", "Could not add to cart.");
+      showError("Could not add to cart.");
     }
   };
 
   const handleBuyNow = () => {
-    Alert.alert("Buy Now", `Proceeding to buy ${quantity} ${item.name}(s).`);
+    showSuccess(`Proceeding to buy ${quantity} ${item.name}(s).`);
   };
 
   return (
@@ -133,10 +134,12 @@ const styles = StyleSheet.create({
   },
   price: {
     fontSize: 20,
-    fontWeight: "600"
+    fontWeight: "600",
+    color: "#28a745",
+
   },
 
-  // ⭐ Rating
+  //  Rating
   ratingRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -190,7 +193,9 @@ const styles = StyleSheet.create({
   },
   totalPrice: {
     fontSize: 18,
-    fontWeight: "bold"
+    fontWeight: "bold",
+    color: "#28a745",
+
   },
 
   buttonRow: {

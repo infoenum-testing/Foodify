@@ -31,12 +31,12 @@ const LoginScreen = ({ navigation }) => {
 
         setErrors(newErrors);
         if (!valid) return;
-            try {
-        await AuthService.login(email, password);
-        navigation.replace('HomeTab');
-    } catch (error) {
-        Alert.alert('Login Failed', error.message);
-    }
+        try {
+            await AuthService.login(email, password);
+            navigation.replace('HomeTab');
+        } catch (error) {
+            Alert.alert('Login Failed', error.message);
+        }
     };
 
     return (
@@ -85,9 +85,15 @@ const LoginScreen = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
 
-            <Text style={styles.orText}> --------- OR --------</Text>
+            {/* OR Divider */}
+            <View style={styles.dividerContainer}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.orText}>OR</Text>
+                <View style={styles.dividerLine} />
+            </View>
 
-            // Google Sign-In 
+
+            // Google Sign-In
             <GoogleSigninButton
                 style={styles.socialButton}
                 size={GoogleSigninButton.Size.Wide}
@@ -95,7 +101,7 @@ const LoginScreen = ({ navigation }) => {
                 onPress={() => { }}
             />
 
-            // Apple Sign-In 
+            // Apple Sign-In
             {Platform.OS === 'ios' && (
                 <AppleButton
                     style={styles.socialButton}
@@ -158,6 +164,23 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         alignSelf: 'center',
     },
+    dividerContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 20,
+    },
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: '#ccc',
+    },
+    orText: {
+        marginHorizontal: 10,
+        fontSize: 16,
+        color: '#888',
+        fontWeight: '500',
+    },
+
 });
 
 export default LoginScreen;
