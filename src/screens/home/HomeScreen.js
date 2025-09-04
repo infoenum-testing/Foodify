@@ -5,7 +5,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  Image,
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
@@ -13,8 +12,8 @@ import {
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import SearchBar from "../../components/SearchBar";
 import { fetchMenu } from "../../services/api";
-import styles from "./HomeScreenStyles";      
-
+import ProductCard from "../../components/ProductCard";
+import styles from "./HomeScreenStyles";
 
 const HomeScreen = ({ navigation }) => {
   const [categories, setCategories] = useState([]);
@@ -67,24 +66,18 @@ const HomeScreen = ({ navigation }) => {
     );
   }
 
-  // --- Render single product card ---
-  const renderProduct = ({ item }) => (
-    <TouchableOpacity
-      style={styles.productCard}
+  // Reusable render
+  const renderProduct = ({ item }, horizontal = true) => (
+    <ProductCard
+      item={item}
       onPress={() => navigation.navigate("ItemDetails", { item })}
-    >
-      <Image source={{ uri: item.image }} style={styles.productImage} />
-      <View style={styles.productInfo}>
-        <Text style={styles.productName}>{item.name}</Text>
-        <Text style={styles.shopName}>{item.shop}</Text>
-        <Text style={styles.productPrice}>₹{item.price}</Text>
-      </View>
-    </TouchableOpacity>
+      horizontal={horizontal}
+    />
   );
 
   return (
     <SafeAreaProvider style={styles.container}>
-      {/* 🔎 Search Bar */}
+      {/*  Search Bar */}
       <SearchBar
         value={searchQuery}
         onChangeText={setSearchQuery}
@@ -99,7 +92,7 @@ const HomeScreen = ({ navigation }) => {
             keyExtractor={(item) => String(item.id)}
             numColumns={2}
             contentContainerStyle={styles.gridList}
-            renderItem={renderProduct}
+            renderItem={({ item }) => renderProduct({ item }, false)}
           />
         ) : (
           <View style={styles.center}>
@@ -158,36 +151,36 @@ const HomeScreen = ({ navigation }) => {
             </ScrollView>
           </View>
 
-          {/* 🛒 Products Section */}
+          {/*  Products Section */}
           {selectedCategory === "All"
             ? categories.map((cat) => (
-                <View key={cat.id} style={styles.sectionWrapper}>
-                  <View style={styles.sectionHeader}>
-                    <Text style={styles.sectionTitle}>{cat.name}</Text>
-                    <TouchableOpacity
-                      onPress={() =>
-                        navigation.navigate("CategoryProducts", {
-                          category: {
-                            ...cat,
-                            products: productsByCategory[cat.name] || [],
-                          },
-                        })
-                      }
-                    >
-                      <Text style={styles.seeAll}>See All</Text>
-                    </TouchableOpacity>
-                  </View>
-
-                  <FlatList
-                    data={productsByCategory[cat.name] || []}
-                    horizontal
-                    keyExtractor={(item) => String(item.id)}
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.horizontalList}
-                    renderItem={renderProduct}
-                  />
+              <View key={cat.id} style={styles.sectionWrapper}>
+                <View style={styles.sectionHeader}>
+                  <Text style={styles.sectionTitle}>{cat.name}</Text>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigation.navigate("CategoryProducts", {
+                        category: {
+                          ...cat,
+                          products: productsByCategory[cat.name] || [],
+                        },
+                      })
+                    }
+                  >
+                    <Text style={styles.seeAll}>See All</Text>
+                  </TouchableOpacity>
                 </View>
-              ))
+
+                <FlatList
+                  data={productsByCategory[cat.name] || []}
+                  horizontal
+                  keyExtractor={(item) => String(item.id)}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.horizontalList}
+                  renderItem={({ item }) => renderProduct({ item }, true)}
+                />
+              </View>
+            ))
             : (
               <View style={styles.sectionWrapper}>
                 <View style={styles.sectionHeader}>
@@ -212,7 +205,7 @@ const HomeScreen = ({ navigation }) => {
                   keyExtractor={(item) => String(item.id)}
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={styles.horizontalList}
-                  renderItem={renderProduct}
+                  renderItem={({ item }) => renderProduct({ item }, true)}
                 />
               </View>
             )}
@@ -223,4 +216,3 @@ const HomeScreen = ({ navigation }) => {
 };
 
 export default HomeScreen;
-

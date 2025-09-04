@@ -33,31 +33,39 @@ export default function CheckoutScreen({ route, navigation }) {
 
       const userId = user.uid;
 
-      const newOrderRef = db.ref(`/users/${userId}/orders`).push();
+      // Create a unique orderId
+      const newOrderRef = db.ref(`/orders`).push();
+      const orderId = newOrderRef.key;
 
-      await newOrderRef.set({
+      const orderData = {
+        orderId,
+        userId,
         customer: { name, address, phone },
         items: cartItems,
         totalPrice,
-      });
+        status: "Pending", // can later be updated by admin
+        createdAt: new Date().toISOString(),
+      };
+
+      await newOrderRef.set(orderData);
+
+      await db.ref(`/users/${userId}/orders/${orderId}`).set(orderData);
+
+      await db.ref(`/carts/${userId}`).remove();
 
       setName("");
       setAddress("");
       setPhone("");
 
-      await db.ref(`/carts/${userId}`).remove();
-
       Alert.alert("Success", "Your order has been placed!", [
-        {
-          text: "OK",
-          onPress: () => navigation.goBack()
-        },
+        { text: "OK", onPress: () => navigation.goBack() },
       ]);
     } catch (error) {
       console.error("Error adding order: ", error);
       Alert.alert("Error", "Something went wrong. Please try again.");
     }
   };
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

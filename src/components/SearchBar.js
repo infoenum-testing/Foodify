@@ -1,10 +1,14 @@
 // src/components/SearchBar.js
 import React from "react";
-import { View, TextInput, StyleSheet } from "react-native";
+import { View, TextInput, StyleSheet, Image } from "react-native";
 
 const SearchBar = ({ value, onChangeText, placeholder = "Search..." }) => {
     return (
         <View style={styles.searchContainer}>
+            <Image
+                source={require('../../Assets/Images/search.png')}
+                style={styles.searchIcon}
+            />
             <TextInput
                 style={styles.searchInput}
                 placeholder={placeholder}
@@ -20,19 +24,29 @@ export default SearchBar;
 
 const styles = StyleSheet.create({
     searchContainer: {
-        paddingHorizontal: 20,
-        marginBottom: 15
-    },
-    searchInput: {
+        flexDirection: "row",
+        alignItems: "center",
         backgroundColor: "#fff",
         borderRadius: 30,
-        paddingHorizontal: 15,
-        height: 48,
-        fontSize: 16,
+        marginBottom: 15,
+        marginHorizontal: 20,
         borderWidth: 1,
         borderColor: "#eee",
         shadowColor: "#000",
         shadowOpacity: 0.05,
         shadowOffset: { width: 0, height: 2 },
+        height: 48,
+        paddingHorizontal: 12,
+    },
+    searchIcon: {
+        width: 30,
+        height: 30,
+        tintColor: "#888",
+        marginRight: 10,
+    },
+    searchInput: {
+        flex: 1,
+        fontSize: 16,
+        color: "#333",
     },
 });

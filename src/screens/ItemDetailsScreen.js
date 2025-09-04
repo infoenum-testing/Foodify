@@ -10,7 +10,7 @@ import Button from "../components/Button";
 import { FirebaseAuth, db } from "../../FirebaseManager/firebaseConfig";
 import { showError, showSuccess } from "../utils/alerts";
 
-export default function ItemDetailsScreen({ route }) {
+export default function ItemDetailsScreen({ route, navigation }) {
   const { item } = route.params;
   const [quantity, setQuantity] = useState(1);
   const price = item.price;
@@ -20,8 +20,6 @@ export default function ItemDetailsScreen({ route }) {
   const decreaseQty = () => {
     if (quantity > 1) setQuantity(quantity - 1);
   };
-
-  
 
   const handleAddToCart = async () => {
     try {
@@ -45,8 +43,25 @@ export default function ItemDetailsScreen({ route }) {
   };
 
   const handleBuyNow = () => {
-    showSuccess(`Proceeding to buy ${quantity} ${item.name}(s).`);
+    const user = FirebaseAuth.currentUser;
+    if (!user) {
+      showError("You must be logged in to continue.");
+      return;
+    }
+
+    // Prepare item with selected quantity
+    const buyNowItem = {
+      ...item,
+      quantity,
+    };
+
+    // Navigate directly to Checkout screen
+    navigation.navigate("Checkout", {
+      totalPrice: buyNowItem.price * buyNowItem.quantity,
+      cartItems: [buyNowItem],
+    });
   };
+
 
   return (
     <ScrollView style={styles.container}>

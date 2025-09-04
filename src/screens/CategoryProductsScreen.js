@@ -1,21 +1,22 @@
-// src/screens/CategoryProductsScreen.js
 
-import React from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Image,
-  TouchableOpacity,
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { Text, StyleSheet, FlatList, Dimensions } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import ProductCard from "../components/ProductCard";
 
 const CategoryProductsScreen = ({ route, navigation }) => {
   const { category } = route.params;
+  const products = category.products || [];
+  const [screenWidth, setScreenWidth] = useState(Dimensions.get("window").width);
 
-  // Products for this category
-  const products = category.products || []; 
+  useEffect(() => {
+    const subscription = Dimensions.addEventListener("change", ({ window }) => {
+      setScreenWidth(window.width);
+    });
+    return () => subscription?.remove();
+  }, []);
+
+  const cardWidth = (screenWidth - 48) / 2;
 
   return (
     <SafeAreaProvider style={styles.container}>
@@ -26,20 +27,17 @@ const CategoryProductsScreen = ({ route, navigation }) => {
       ) : (
         <FlatList
           data={products}
+          numColumns={2}
           keyExtractor={(item) => String(item.id)}
+          columnWrapperStyle={{ justifyContent: "space-between" }}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.productCard}
+            <ProductCard
+              item={item}
+              width={cardWidth}
               onPress={() => navigation.navigate("ItemDetails", { item })}
-            >
-              <Image source={{ uri: item.image }} style={styles.productImage} />
-              <View style={styles.productInfo}>
-                <Text style={styles.productName}>{item.name}</Text>
-                <Text style={styles.shopName}>{item.shop}</Text>
-                <Text style={styles.productPrice}>₹{item.price}</Text>
-              </View>
-            </TouchableOpacity>
+              horizontal={false} 
+            />
           )}
         />
       )}
@@ -52,51 +50,23 @@ export default CategoryProductsScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    padding: 20,
+    backgroundColor: "#f9f9f9",
+    paddingHorizontal: 16,
+    paddingTop: 10
   },
   header: {
     fontSize: 22,
     fontWeight: "700",
-    marginBottom: 20,
+    marginBottom: 15,
+    color: "#222"
   },
   emptyText: {
     fontSize: 16,
     color: "#888",
     textAlign: "center",
-    marginTop: 40,
+    marginTop: 40
   },
   list: {
-    paddingBottom: 20,
-  },
-  productCard: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    marginBottom: 16,
-    overflow: "hidden",
-    elevation: 3,
-  },
-  productImage: {
-    width: "100%",
-    height: 150,
-  },
-  productInfo: {
-    padding: 12,
-  },
-  productName: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginBottom: 4,
-    color: "#222",
-  },
-  shopName: {
-    fontSize: 13,
-    color: "#666",
-  },
-  productPrice: {
-    fontSize: 16,
-    fontWeight: "700",
-    marginTop: 6,
-    color: "#28a745",
+    paddingBottom: 20
   },
 });
