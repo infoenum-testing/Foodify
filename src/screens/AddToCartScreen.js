@@ -5,11 +5,24 @@ import Button from "../components/Button";
 import SearchBar from "../components/SearchBar";
 import CartItem from "../components/CartItem";
 import { FirebaseAuth, db } from "../../FirebaseManager/firebaseConfig";
-import { showError } from "../utils/alerts";
+import CustomAlert from "../components/CustomAlert";
+
 
 export default function CartScreen({ navigation }) {
     const [cartItems, setCartItems] = useState([]);
     const [search, setSearch] = useState("");
+
+    const [alertConfig, setAlertConfig] = useState({
+        visible: false,
+        title: "",
+        message: "",
+        onConfirm: null,
+    });
+
+    // Show alert helper
+    const showAlert = (title, message, onConfirm = null, showCancel = true) => {
+        setAlertConfig({ visible: true, title, message, onConfirm, showCancel });
+    };
 
     useEffect(() => {
         const user = FirebaseAuth.currentUser;
@@ -34,7 +47,14 @@ export default function CartScreen({ navigation }) {
         if (!user) return;
 
         db.ref(`/carts/${user.uid}/${id}`).update({ quantity: newQty }).catch(() => {
-            showError("Failed to update item quantity");
+            showAlert(
+                " Failed",
+                "Failed to update item quantity",
+                () => {
+                    setAlertConfig({ ...alertConfig, visible: false });
+                },
+                false
+            );
         });
     };
 
@@ -43,7 +63,14 @@ export default function CartScreen({ navigation }) {
         if (!user) return;
 
         db.ref(`/carts/${user.uid}/${id}`).remove().catch(() => {
-            showError("Failed to remove item");
+            showAlert(
+                " Failed",
+                "Failed to remove item",
+                () => {
+                    setAlertConfig({ ...alertConfig, visible: false });
+                },
+                false
+            );
         });
     };
 
@@ -92,6 +119,22 @@ export default function CartScreen({ navigation }) {
                     </View>
                 </>
             )}
+
+            <CustomAlert
+                visible={alertConfig.visible}
+                title={alertConfig.title}
+                message={alertConfig.message}
+                onClose={() => setAlertConfig({ ...alertConfig, visible: false })}
+                onConfirm={
+                    alertConfig.onConfirm
+                        ? () => {
+                            alertConfig.onConfirm();
+                            setAlertConfig({ ...alertConfig, visible: false });
+                        }
+                        : null
+                }
+                showCancel={alertConfig.showCancel ?? true}
+            />
         </View>
     );
 }

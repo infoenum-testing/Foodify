@@ -92,7 +92,7 @@ const HomeScreen = ({ navigation }) => {
             keyExtractor={(item) => String(item.id)}
             numColumns={3}
             contentContainerStyle={styles.gridList}
-            columnWrapperStyle={{ gap: 10, marginBottom: 16 }} // controlled gap
+            columnWrapperStyle={{ gap: 10, marginBottom: 16 }}
 
             renderItem={({ item }) => renderProduct({ item }, false)}
           />

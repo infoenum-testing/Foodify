@@ -6,15 +6,27 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  Alert,
   ActivityIndicator,
 } from "react-native";
 import { FirebaseAuth, db } from "../../FirebaseManager/firebaseConfig";
-
+import CustomAlert from "../components/CustomAlert";
 
 export default function ProfileScreen({ navigation }) {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Alert state
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+  });
+
+  // Show alert helper
+  const showAlert = (title, message, onConfirm = null) => {
+    setAlertConfig({ visible: true, title, message, onConfirm });
+  };
 
   useEffect(() => {
     const user = FirebaseAuth.currentUser;
@@ -31,42 +43,41 @@ export default function ProfileScreen({ navigation }) {
   }, []);
 
   const handleHelp = () => {
-    Alert.alert("Help & Support", "Contact support at support@example.com");
+    showAlert("Help & Support", "Contact support at support@example.com");
   };
 
-  const handleDeleteAccount = async () => {
+  const handleDeleteAccount = () => {
     const user = FirebaseAuth.currentUser;
     if (!user) return;
 
-    Alert.alert(
+    showAlert(
       "Delete Account",
       "Are you sure you want to delete your account? This action cannot be undone.",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Delete",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await db.ref(`/users/${user.uid}`).remove();
-              await user.delete();
-              navigation.reset({ index: 0, routes: [{ name: "Login" }] });
-            } catch (error) {
-              Alert.alert("Error", error.message);
-            }
-          },
-        },
-      ]
+      async () => {
+        try {
+          await db.ref(`/users/${user.uid}`).remove();
+          await user.delete();
+          navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+        } catch (error) {
+          showAlert("Error", error.message);
+        }
+      }
     );
   };
 
-  const handleLogout = async () => {
-    try {
-      await FirebaseAuth.signOut();
-      navigation.reset({ index: 0, routes: [{ name: "Login" }] });
-    } catch (error) {
-      Alert.alert("Error", "Failed to logout. Please try again.");
-    }
+  const handleLogout = () => {
+    showAlert(
+      "Logout",
+      "Are you sure you want to logout?",
+      async () => {
+        try {
+          await FirebaseAuth.signOut();
+          navigation.reset({ index: 0, routes: [{ name: "Login" }] });
+        } catch (error) {
+          showAlert("Error", "Failed to logout. Please try again.");
+        }
+      }
+    );
   };
 
   if (loading) {
@@ -124,6 +135,22 @@ export default function ProfileScreen({ navigation }) {
           isDanger
         />
       </View>
+
+      {/* ✅ Custom Alert */}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onClose={() => setAlertConfig({ ...alertConfig, visible: false })}
+        onConfirm={
+          alertConfig.onConfirm
+            ? () => {
+              alertConfig.onConfirm();
+              setAlertConfig({ ...alertConfig, visible: false });
+            }
+            : null
+        }
+      />
     </ScrollView>
   );
 }
@@ -132,8 +159,13 @@ function MenuItem({ icon, label, onPress, isDanger }) {
   return (
     <TouchableOpacity style={styles.menuItem} onPress={onPress}>
       <View style={styles.menuRow}>
-        <Image source={icon} style={[styles.menuIcon, isDanger && { tintColor: "red" }]} />
-        <Text style={[styles.menuText, isDanger && { color: "red" }]}>{label}</Text>
+        <Image
+          source={icon}
+          style={[styles.menuIcon, isDanger && { tintColor: "red" }]}
+        />
+        <Text style={[styles.menuText, isDanger && { color: "red" }]}>
+          {label}
+        </Text>
       </View>
     </TouchableOpacity>
   );
@@ -142,7 +174,7 @@ function MenuItem({ icon, label, onPress, isDanger }) {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#f4f6f8"
+    backgroundColor: "#f4f6f8",
   },
   header: {
     alignItems: "center",
@@ -156,15 +188,15 @@ const styles = StyleSheet.create({
     width: 120,
     height: 120,
     borderRadius: 60,
-    marginBottom: 12
+    marginBottom: 12,
   },
   name: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#222"
+    color: "#222",
   },
   menu: {
-    marginHorizontal: 20
+    marginHorizontal: 20,
   },
   menuItem: {
     padding: 16,
@@ -177,16 +209,16 @@ const styles = StyleSheet.create({
   },
   menuRow: {
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
   },
   menuIcon: {
     width: 22,
     height: 22,
     tintColor: "#28a745",
-    marginRight: 12
+    marginRight: 12,
   },
   menuText: {
     fontSize: 16,
-    fontWeight: "600"
+    fontWeight: "600",
   },
 });

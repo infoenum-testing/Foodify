@@ -6,17 +6,33 @@ import { AppleButton } from "@invertase/react-native-apple-authentication";
 import { useDispatch } from "react-redux";
 
 // Custom components
-import Input from "../components/Input";
-import Button from "../components/Button";
-import { validateEmail, validatePassword } from "../utils/validations";
-import { AuthService } from "../../FirebaseManager/authService";
-import { setLoggedIn } from "../redux/authSlice";
+import Input from "../../components/Input";
+import Button from "../../components/Button";
+import { validateEmail, validatePassword } from "../../utils/validations";
+import { AuthService } from "../../../FirebaseManager/authService";
+import { setLoggedIn } from "../../redux/authSlice";
+import CustomAlert from "../../components/CustomAlert";
+import styles from "./LoginScreenStyle";
+
+
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "" });
   const dispatch = useDispatch();
+
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+  });
+
+  // Show alert helper
+  const showAlert = (title, message, onConfirm = null, showCancel = true) => {
+    setAlertConfig({ visible: true, title, message, onConfirm, showCancel });
+  };
 
   const loginButtonTapped = async () => {
     let valid = true;
@@ -36,10 +52,18 @@ const LoginScreen = ({ navigation }) => {
 
     try {
       await AuthService.login(email, password);
-      dispatch(setLoggedIn()); // ✅ Redux handles navigation
+      dispatch(setLoggedIn());
     } catch (error) {
-      Alert.alert("Login Failed", error.message);
+      showAlert(
+        "Login Failed",
+        "Something went wrong. Please try again.",
+        () => {
+          setAlertConfig({ ...alertConfig, visible: false });
+        },
+        false
+      );
     }
+
   };
 
   return (
@@ -96,7 +120,7 @@ const LoginScreen = ({ navigation }) => {
         style={styles.socialButton}
         size={GoogleSigninButton.Size.Wide}
         color={GoogleSigninButton.Color.Dark}
-        onPress={() => {}}
+        onPress={() => { }}
       />
 
       {/* Apple Sign-In */}
@@ -106,72 +130,27 @@ const LoginScreen = ({ navigation }) => {
           cornerRadius={5}
           buttonStyle={AppleButton.Style.BLACK}
           buttonType={AppleButton.Type.SIGN_IN}
-          onPress={() => {}}
+          onPress={() => { }}
         />
+
       )}
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onClose={() => setAlertConfig({ ...alertConfig, visible: false })}
+        onConfirm={
+          alertConfig.onConfirm
+            ? () => {
+              alertConfig.onConfirm();
+              setAlertConfig({ ...alertConfig, visible: false });
+            }
+            : null
+        }
+        showCancel={alertConfig.showCancel ?? true}
+      />
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 24,
-    backgroundColor: "#fff",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-    alignSelf: "center",
-    color: "#2382AA",
-    marginBottom: 32,
-  },
-  forgotPasswordContainer: {
-    alignItems: "flex-end",
-    marginTop: 8,
-  },
-  forgotPasswordText: {
-    color: "#2382AA",
-    fontSize: 14,
-    fontWeight: "500",
-  },
-  signUpContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginTop: 16,
-  },
-  signUpText: {
-    color: "black",
-    fontSize: 16,
-  },
-  signUpLink: {
-    color: "#2382AA",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginVertical: 20,
-  },
-  dividerLine: {
-    flex: 1,
-    height: 1,
-    backgroundColor: "#ccc",
-  },
-  orText: {
-    marginHorizontal: 10,
-    fontSize: 16,
-    color: "#888",
-    fontWeight: "500",
-  },
-  socialButton: {
-    width: "100%",
-    height: 48,
-    marginBottom: 12,
-    alignSelf: "center",
-  },
-});
 
 export default LoginScreen;

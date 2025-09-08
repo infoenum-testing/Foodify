@@ -1,5 +1,4 @@
 
-
 import React, { useEffect, useState } from "react";
 import { View, Text, FlatList, StyleSheet, Image } from "react-native";
 import { FirebaseAuth, db } from "../../FirebaseManager/firebaseConfig";

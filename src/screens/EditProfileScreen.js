@@ -5,6 +5,8 @@ import { FirebaseAuth, db } from "../../FirebaseManager/firebaseConfig";
 import Input from "../components/Input";
 import Button from "../components/Button";
 import { launchImageLibrary } from "react-native-image-picker";
+import CustomAlert from "../components/CustomAlert";
+
 
 export default function EditProfileScreen({ navigation, route }) {
   const profile = route.params?.profile || {};
@@ -12,11 +14,28 @@ export default function EditProfileScreen({ navigation, route }) {
   const [name, setName] = useState(profile.name || "");
   const [avatar, setAvatar] = useState(profile.avatar || "");
 
+  const [alertConfig, setAlertConfig] = useState({
+    visible: false,
+    title: "",
+    message: "",
+    onConfirm: null,
+  });
+
+  // Show alert helper
+  const showAlert = (title, message, onConfirm = null, showCancel = true) => {
+    setAlertConfig({ visible: true, title, message, onConfirm, showCancel });
+  };
+
   const pickImage = () => {
     launchImageLibrary({ mediaType: "photo" }, (response) => {
       if (response.didCancel) return;
       if (response.errorCode) {
-        Alert.alert("Error", response.errorMessage);
+        showAlert("Error", response.errorMessage,
+          () => {
+            setAlertConfig({ ...alertConfig, visible: false });
+          },
+          false
+        );
         return;
       }
       if (response.assets && response.assets.length > 0) {
@@ -36,7 +55,15 @@ export default function EditProfileScreen({ navigation, route }) {
       });
       navigation.goBack();
     } catch (error) {
-      Alert.alert("Error", "Could not update profile.");
+
+      showAlert(
+        "Error",
+        "Could not update profile.",
+        () => {
+          setAlertConfig({ ...alertConfig, visible: false });
+        },
+        false
+      );
     }
   };
 
@@ -65,6 +92,22 @@ export default function EditProfileScreen({ navigation, route }) {
 
       {/* Save Button */}
       <Button title="Save" onPress={handleSave} />
+
+      <CustomAlert
+        visible={alertConfig.visible}
+        title={alertConfig.title}
+        message={alertConfig.message}
+        onClose={() => setAlertConfig({ ...alertConfig, visible: false })}
+        onConfirm={
+          alertConfig.onConfirm
+            ? () => {
+              alertConfig.onConfirm();
+              setAlertConfig({ ...alertConfig, visible: false });
+            }
+            : null
+        }
+        showCancel={alertConfig.showCancel ?? true}
+      />
     </View>
   );
 }

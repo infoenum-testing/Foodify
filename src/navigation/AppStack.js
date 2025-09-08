@@ -4,9 +4,9 @@ import BackButton from "../components/BackButton";
 
 import HomeTab from "./HomeTab";
 import EditProfile from "../screens/EditProfileScreen";
-import ItemDetailsScreen from "../screens/ItemDetailsScreen";
+import ItemDetailsScreen from "../screens/itemDetails/ItemDetailsScreen";
 import CategoryProductsScreen from "../screens/CategoryProductsScreen";
-import CheckoutScreen from "../screens/CheckoutScreen";
+import CheckoutScreen from "../screens/checkout/CheckoutScreen";
 import MyOrdersScreen from "../screens/MyOrdersScreen";
 
 const Stack = createNativeStackNavigator();
