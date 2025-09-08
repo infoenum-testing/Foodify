@@ -3,38 +3,47 @@ import { useColorScheme } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import SplashScreen from "react-native-splash-screen";
-import { Provider, useSelector } from "react-redux";
+import { Provider, useDispatch } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 
-import AuthStack from "./src/navigation/AuthStack";
-import HomeTab from "./src/navigation/HomeTab";
+import AppNavigator from "./src/navigation/AppNavigator";
 import { store, persistor } from "./src/redux/store";
-
-// AppNavigator component to decide initial route
-const AppNavigator = () => {
-  const { isLoggedIn } = useSelector((state) => state.auth);
-
-  return isLoggedIn ? <HomeTab /> : <AuthStack />;
-};
+import { AuthService } from "./FirebaseManager/authService";
+import { setLoggedIn, setLoggedOut } from "./src/redux/authSlice";
 
 function App() {
+  const dispatch = useDispatch();
   const isDarkMode = useColorScheme() === "dark";
 
   useEffect(() => {
     SplashScreen.hide();
-  }, []);
 
+    const unsubscribe = AuthService.listenToAuthChanges((user) => {
+      if (user) {
+        dispatch(setLoggedIn());
+      } else {
+        dispatch(setLoggedOut());
+      }
+    });
+
+    return unsubscribe;
+  }, [dispatch]);
+
+  return (
+    <SafeAreaProvider>
+      <NavigationContainer>
+        <AppNavigator />
+      </NavigationContainer>
+    </SafeAreaProvider>
+  );
+}
+
+export default function Root() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <SafeAreaProvider>
-          <NavigationContainer>
-            <AppNavigator />
-          </NavigationContainer>
-        </SafeAreaProvider>
+        <App />
       </PersistGate>
     </Provider>
   );
 }
-
-export default App;

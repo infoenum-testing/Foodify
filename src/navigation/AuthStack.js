@@ -8,13 +8,6 @@ import SignupScreen from "../screens/SignupScreen";
 import ForgotPasswordScreen from "../screens/ForgotPasswordScreen";
 import OtpScreen from "../screens/OtpScreen";
 import ResetPassword from "../screens/ResetPasswordScreen";
-import EditProflie from "../screens/EditProfileScreen";
-import ItemDetailsScreen from "../screens/ItemDetailsScreen";
-import CategoryProductsScreen from "../screens/CategoryProductsScreen";
-import CheckoutScreen from "../screens/CheckoutScreen";
-import MyOrdersScreen from "../screens/MyOrdersScreen";
-
-import HomeTab from "./HomeTab";
 
 const Stack = createNativeStackNavigator();
 
@@ -28,7 +21,6 @@ const AuthStack = () => {
       />
       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
       <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
-
       <Stack.Screen
         name="ForgotPassword"
         component={ForgotPasswordScreen}
@@ -53,43 +45,6 @@ const AuthStack = () => {
           headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
         })}
       />
-      <Stack.Screen
-        name="EditProflie"
-        component={EditProflie}
-        options={({ navigation }) => ({
-          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-        })}
-      />
-      <Stack.Screen
-        name="ItemDetails"
-        component={ItemDetailsScreen}
-        options={({ navigation }) => ({
-          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-        })}
-      />
-      <Stack.Screen
-        name="CategoryProducts"
-        component={CategoryProductsScreen}
-        options={({ navigation }) => ({
-          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-        })}
-      />
-      <Stack.Screen
-        name="Checkout"
-        component={CheckoutScreen}
-        options={({ navigation }) => ({
-          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-        })}
-      />
-      <Stack.Screen
-        name="MyOrders"
-        component={MyOrdersScreen}
-        options={({ navigation }) => ({
-          headerLeft: () => <BackButton onPress={() => navigation.goBack()} />,
-        })}
-      />
-
-      <Stack.Screen name="HomeTab" component={HomeTab} options={{ headerShown: false }} />
     </Stack.Navigator>
   );
 };

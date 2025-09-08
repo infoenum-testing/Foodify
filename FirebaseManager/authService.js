@@ -1,5 +1,7 @@
 // FirebaseManager/authService.js
 import { FirebaseAuth } from "./firebaseConfig";
+import { onAuthStateChanged } from "firebase/auth";
+
 
 export const AuthService = {
   // ✅ Create User
@@ -65,7 +67,12 @@ export const AuthService = {
       throw error;
     }
   },
-
+  
+  listenToAuthChanges: (callback) => {
+    return onAuthStateChanged(FirebaseAuth, (user) => {
+      callback(user);
+    });
+  },
   // ✅ Send Password Reset Email
   resetPassword: async (email) => {
     try {

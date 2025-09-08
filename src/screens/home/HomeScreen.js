@@ -90,8 +90,10 @@ const HomeScreen = ({ navigation }) => {
           <FlatList
             data={filteredResults}
             keyExtractor={(item) => String(item.id)}
-            numColumns={2}
+            numColumns={3}
             contentContainerStyle={styles.gridList}
+            columnWrapperStyle={{ gap: 10, marginBottom: 16 }} // controlled gap
+
             renderItem={({ item }) => renderProduct({ item }, false)}
           />
         ) : (

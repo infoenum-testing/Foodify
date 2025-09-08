@@ -1,15 +1,13 @@
-
 import React, { useState } from 'react';
 import { View, TextInput, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
-const Input = ({ 
-  label, 
-  value, 
-  onChangeText, 
-  keyboardType, 
-  secureTextEntry, 
-  error, 
-  isPassword = false 
+const Input = ({
+  label,
+  value,
+  onChangeText,
+  keyboardType,
+  error,
+  isPassword = false
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -21,7 +19,7 @@ const Input = ({
           style={[styles.input, error && { borderColor: 'red' }]}
           value={value}
           onChangeText={onChangeText}
-          keyboardType={keyboardType}
+          keyboardType={keyboardType || 'default'}
           secureTextEntry={isPassword && !showPassword}
           autoCapitalize="none"
           autoCorrect={false}
